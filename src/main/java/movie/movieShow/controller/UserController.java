@@ -5,12 +5,14 @@ import movie.movieShow.model.Movie;
 import movie.movieShow.model.User;
 import movie.movieShow.repo.MovieRepository;
 import movie.movieShow.repo.UserRepository;
+import movie.movieShow.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +24,9 @@ public class UserController {
     UserRepository userRepository;
     @Autowired
     MovieRepository movieRepository;
+
+    @Autowired
+    MailService mailService;
 
     @PostMapping(value = "/user/register", produces = "application/json")
     private ResponseEntity<?> registerController(@RequestBody User userToRegister) {
@@ -38,6 +43,12 @@ public class UserController {
         newU.setAdmin(false);
         newU.setBanned(false);
         userRepository.save(newU);
+
+        try {
+            mailService.sendMail(userToRegister.getEmail(), "Welcome in movie borwser", "<a href = \"localhost:3000\">Movie browser</a>", true);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
 
         return new ResponseEntity<>(newU,HttpStatus.OK);
     }
