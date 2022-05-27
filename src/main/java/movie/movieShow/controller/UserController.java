@@ -39,7 +39,7 @@ public class UserController {
         newU.setBanned(false);
         userRepository.save(newU);
 
-        return new ResponseEntity<>(userRepository.findAll(),HttpStatus.OK);
+        return new ResponseEntity<>(newU,HttpStatus.OK);
     }
     @PostMapping(value = "/user/login", produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<?> loginController(@RequestBody User userToRegister) {
@@ -56,21 +56,26 @@ public class UserController {
         return ResponseEntity.ok(Set.of(new CustomError("Wrong data!")));
     }
 
-    @PostMapping(value = "/user/favorite/:userid", produces = "application/json")
-    private ResponseEntity<?> addFavorite(@RequestBody Movie movieToAdd, @PathVariable Long userid) {
-        User isPresent = userRepository.getById(userid);
+    @PostMapping(value = "/user/favorite", produces = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<?> addFavorite(@RequestBody Movie movieToAdd) {
+        User isPresent = userRepository.getById(movieToAdd.getUserId());
         if(isPresent == null) {
-            return new ResponseEntity<>("Register first!", HttpStatus.CONFLICT);
+            return ResponseEntity.ok(Set.of(new CustomError("Register first!")));
         }
         Movie movie = new Movie();
-        movie.setName(movie.getName());
+        movie.setName(movieToAdd.getName());
         movie.setExternalId(movieToAdd.getExternalId());
         Movie savedMovie = movieRepository.save(movie);
         isPresent.getFavoriteMovies().add(savedMovie);
         userRepository.save(isPresent);
 
-        return new ResponseEntity<>("Done", HttpStatus.OK);
+
+        return ResponseEntity.ok(isPresent.getFavoriteMovies());
     }
 
+    @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<?> getAll() {
+        return ResponseEntity.ok(userRepository.findAll());
+    }
 
 }

@@ -17,6 +17,9 @@ public class CORSFilter{
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost")
                         .allowedMethods("*");
+                registry.addMapping("/*/*")
+                        .allowedOrigins("http://localhost")
+                        .allowedMethods("*");
             }
         };
     }
